@@ -13,74 +13,55 @@ architecture FIR_ARCH of FIR is
 constant h0: signed(15 downto 0) := to_signed(2, 16);
 constant h1: signed(15 downto 0) := to_signed(5, 16);
 constant h2: signed(15 downto 0) := to_signed(7, 16);
-signal x1_reg, x2_reg, x3_reg, x4_reg, x5_reg, x6_reg: signed (15 downto 0) := (others => '0');
-signal x1_next, x2_next, x3_next, x4_next, x5_next, x6_next: signed (15 downto 0);
-signal sum1_reg, sum2_reg, sum3_reg: signed (15 downto 0) := (others => '0');
-signal sum1_next, sum2_next, sum3_next: signed (15 downto 0);
-signal mult1_reg, mult2_reg, mult3_reg, st1_reg, st2_reg, m2d_reg, m3d_reg: signed (31 downto 0) := (others => '0');
-signal mult1_next, mult2_next, mult3_next, st1_next, st2_next, m2d_next, m3d_next: signed (31 downto 0);
-
+type reg_file is array (5 downto 0) of signed (15 downto 0);
+type sum_file is array (2 downto 0) of signed (15 downto 0);
+type mult_file is array (2 downto 0) of signed (31 downto 0);
+signal x_reg: reg_file := (others => (others => '0'));
+signal x_next: reg_file;
+signal sum_reg: sum_file := (others => (others => '0'));
+signal sum_next: sum_file;
+signal mult_reg: mult_file := (others => (others => '0'));
+signal mult_next: mult_file;
+signal st1_reg, st2_reg, m3d_reg: signed (31 downto 0) := (others => '0');
+signal st1_next, st2_next, m3d_next: signed (31 downto 0);
 
 begin
-
 	process (clk, reset)
 		begin
 		if(reset = '1') then
-			x6_reg <= (others => '0');
-			x5_reg <= (others => '0');
-			x4_reg <= (others => '0');
-			x3_reg <= (others => '0');
-			x2_reg <= (others => '0');
-			x1_reg <= (others => '0');
-			sum1_reg <= (others => '0');
-			sum2_reg <= (others => '0');
-			sum3_reg <= (others => '0');
-			mult1_reg <= (others => '0');
-			mult2_reg <= (others => '0');
-			mult3_reg <= (others => '0');
+			x_reg <= (others => (others => '0'));
+			sum_reg <= (others => (others => '0'));
+			mult_reg <= (others => (others => '0'));
 			st1_reg <= (others => '0');
 			st2_reg <= (others => '0');
 			m3d_reg <= (others => '0');
-			m2d_reg <= (others => '0');
 		elsif(clk'event and clk = '1') then
-			x1_reg <= x1_next;
-			x2_reg <= x2_next;
-			x3_reg <= x3_next;
-			x4_reg <= x4_next;
-			x5_reg <= x5_next;
-			x6_reg <= x6_next;
-			sum1_reg <= sum1_next;
-			sum2_reg <= sum2_next;
-			sum3_reg <= sum3_next;
-			mult1_reg <= mult1_next;
-			mult2_reg <= mult2_next;
-			mult3_reg <= mult3_next;
+			x_reg <= x_next;
+			sum_reg <= sum_next;
+			mult_reg <= mult_next;
 			st1_reg <= st1_next;
 			st2_reg <= st2_next;
 			m3d_reg <= m3d_next;
-			m2d_reg <= m2d_next;
 		end if;
 	end process;
 	-- entrada y desplazamiento de muestras
-	x1_next <= signed(x);
-	x2_next <= x1_reg;
-	x3_next <= x2_reg;
-	x4_next <= x3_reg;
-	x5_next <= x4_reg;
-	x6_next <= x5_reg;
+	x_next(0) <= signed(x);
+	x_next(1) <= x_reg(0);
+	x_next(2) <= x_reg(1);
+	x_next(3) <= x_reg(2);
+	x_next(4) <= x_reg(3);
+	x_next(5) <= x_reg(4);
 	--etapa 1 sumas simetricas de muestras
-	sum1_next <= x1_reg + x6_reg;
-	sum2_next <= x2_reg + x5_reg;
-	sum3_next <= x3_reg + x4_reg;
+	sum_next(0) <= x_reg(0) + x_reg(5);
+	sum_next(1) <= x_reg(1) + x_reg(4);
+	sum_next(2) <= x_reg(2) + x_reg(3);
 	--etapa 2 multiplicaciones por los coeficientes
-	mult1_next <= sum1_reg * h0;
-	mult2_next <= sum2_reg * h1;
-	mult3_next <= sum3_reg * h2;
-	
-	
+	mult_next(0) <= sum_reg(0) * h0;
+	mult_next(1) <= sum_reg(1) * h1;
+	mult_next(2) <= sum_reg(2) * h2;	
 	-- etapa 3 primera suma
-	st1_next <= mult1_reg + mult2_reg;
-	m3d_next <= mult3_reg;
+	st1_next <= mult_reg(0) + mult_reg(1);
+	m3d_next <= mult_reg(2);
 	-- etapa 4 segunda suma
 	st2_next <= st1_reg + m3d_reg;
 	-- salida
