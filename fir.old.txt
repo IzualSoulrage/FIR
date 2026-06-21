@@ -1,0 +1,85 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity FIR is
+	port(
+		clk, reset: in std_logic;
+		x: in std_logic_vector(15 downto 0);
+		y: out std_logic_vector(15 downto 0));
+end entity;
+
+architecture FIR_ARCH of FIR is
+constant h0: signed(15 downto 0) := to_signed(2, 16);
+constant h1: signed(15 downto 0) := to_signed(5, 16);
+constant h2: signed(15 downto 0) := to_signed(7, 16);
+signal x1_reg, x2_reg, x3_reg, x4_reg, x5_reg, x6_reg: signed (15 downto 0) := (others => '0');
+signal x1_next, x2_next, x3_next, x4_next, x5_next, x6_next: signed (15 downto 0);
+signal sum1_reg, sum2_reg, sum3_reg: signed (15 downto 0) := (others => '0');
+signal sum1_next, sum2_next, sum3_next: signed (15 downto 0);
+signal mult1_reg, mult2_reg, mult3_reg, st1_reg, st2_reg, m2d_reg, m3d_reg: signed (31 downto 0) := (others => '0');
+signal mult1_next, mult2_next, mult3_next, st1_next, st2_next, m2d_next, m3d_next: signed (31 downto 0);
+
+begin
+	process (clk, reset)
+		begin
+		if(reset = '1') then
+			x6_reg <= (others => '0');
+			x5_reg <= (others => '0');
+			x4_reg <= (others => '0');
+			x3_reg <= (others => '0');
+			x2_reg <= (others => '0');
+			x1_reg <= (others => '0');
+			sum1_reg <= (others => '0');
+			sum2_reg <= (others => '0');
+			sum3_reg <= (others => '0');
+			mult1_reg <= (others => '0');
+			mult2_reg <= (others => '0');
+			mult3_reg <= (others => '0');
+			st1_reg <= (others => '0');
+			st2_reg <= (others => '0');
+			m3d_reg <= (others => '0');
+			m2d_reg <= (others => '0');
+		elsif(clk'event and clk = '1') then
+			x1_reg <= x1_next;
+			x2_reg <= x2_next;
+			x3_reg <= x3_next;
+			x4_reg <= x4_next;
+			x5_reg <= x5_next;
+			x6_reg <= x6_next;
+			sum1_reg <= sum1_next;
+			sum2_reg <= sum2_next;
+			sum3_reg <= sum3_next;
+			mult1_reg <= mult1_next;
+			mult2_reg <= mult2_next;
+			mult3_reg <= mult3_next;
+			st1_reg <= st1_next;
+			st2_reg <= st2_next;
+			m3d_reg <= m3d_next;
+			m2d_reg <= m2d_next;
+		end if;
+	end process;
+	-- entrada y desplazamiento de muestras
+	x1_next <= signed(x);
+	x2_next <= x1_reg;
+	x3_next <= x2_reg;
+	x4_next <= x3_reg;
+	x5_next <= x4_reg;
+	x6_next <= x5_reg;
+	--etapa 1 sumas simetricas de muestras
+	sum1_next <= x1_reg + x6_reg;
+	sum2_next <= x2_reg + x5_reg;
+	sum3_next <= x3_reg + x4_reg;
+	--etapa 2 multiplicaciones por los coeficientes
+	mult1_next <= sum1_reg * h0;
+	mult2_next <= sum2_reg * h1;
+	mult3_next <= sum3_reg * h2;
+	
+	-- etapa 3 primera suma
+	st1_next <= mult1_reg + mult2_reg;
+	m3d_next <= mult3_reg;
+	-- etapa 4 segunda suma
+	st2_next <= st1_reg + m3d_reg;
+	-- salida
+	y <= std_logic_vector(resize(st2_reg, 16));
+end architecture;
