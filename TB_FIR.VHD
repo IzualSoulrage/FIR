@@ -8,12 +8,12 @@ architecture TB_FIR_ARCH of TB_FIR is
 component FIR is
 port(
 	clk, reset: in std_logic;
-	x: in std_logic_vector(31 downto 0);
-	y: out std_logic_vector(31 downto 0));
+	x: in std_logic_vector(15 downto 0);
+	y: out std_logic_vector(15 downto 0));
 end component;
 
 signal t_clk, t_reset: std_logic;
-signal t_x, t_y: std_logic_vector (31 downto 0);
+signal t_x, t_y: std_logic_vector (15 downto 0);
 
 begin
 	bloque:FIR

@@ -5,31 +5,31 @@ use ieee.numeric_std.all;
 entity FIR is
 	port(
 		clk, reset: in std_logic;
-		x: in std_logic_vector(31 downto 0);
-		y: out std_logic_vector(31 downto 0));
+		x: in std_logic_vector(15 downto 0);
+		y: out std_logic_vector(15 downto 0));
 end entity;
 
 architecture FIR_ARCH of FIR is
-constant h0: signed(31 downto 0) := to_signed(35673850, 32);
-constant h1: signed(31 downto 0) := to_signed(8388921, 32);
-constant h2: signed(31 downto 0) := to_signed(-30356231, 32);
-constant h3: signed(31 downto 0) := to_signed(-16713219, 32);
-constant h4: signed(31 downto 0) := to_signed(30946730, 32);
-constant h5: signed(31 downto 0) := to_signed(41252939, 32);
-constant h6: signed(31 downto 0) := to_signed(-34079798, 32);
-constant h7: signed(31 downto 0) := to_signed(-67428194, 32);
-constant h8: signed(31 downto 0) := to_signed(19892320, 32);
-constant h9: signed(31 downto 0) := to_signed(112509663, 32);
-constant h10: signed(31 downto 0) := to_signed(10181958, 32);
-constant h11: signed(31 downto 0) := to_signed(-181310867, 32);
-constant h12: signed(31 downto 0) := to_signed(-102876621, 32);
-constant h13: signed(31 downto 0) := to_signed(385863165, 32);
-constant h14: signed(31 downto 0) := to_signed(887001333, 32);
-type reg_file is array (29 downto 0) of signed (31 downto 0);
-type sum_file is array (14 downto 0) of signed (31 downto 0);
-type mult_file is array (14 downto 0) of signed (63 downto 0);
-type st1_file is array (6 downto 0) of signed (63 downto 0);
-type st2_file is array (3 downto 0) of signed (63 downto 0);
+constant h0: signed(15 downto 0) := to_signed(544, 16);
+constant h1: signed(15 downto 0) := to_signed(128, 16);
+constant h2: signed(15 downto 0) := to_signed(-463, 16);
+constant h3: signed(15 downto 0) := to_signed(-255, 16);
+constant h4: signed(15 downto 0) := to_signed(472, 16);
+constant h5: signed(15 downto 0) := to_signed(629, 16);
+constant h6: signed(15 downto 0) := to_signed(-520, 16);
+constant h7: signed(15 downto 0) := to_signed(-1029, 16);
+constant h8: signed(15 downto 0) := to_signed(304, 16);
+constant h9: signed(15 downto 0) := to_signed(1717, 16);
+constant h10: signed(15 downto 0) := to_signed(1717, 16);
+constant h11: signed(15 downto 0) := to_signed(-2767, 16);
+constant h12: signed(15 downto 0) := to_signed(-1570, 16);
+constant h13: signed(15 downto 0) := to_signed(5888, 16);
+constant h14: signed(15 downto 0) := to_signed(13535, 16);
+type reg_file is array (29 downto 0) of signed (15 downto 0);
+type sum_file is array (14 downto 0) of signed (15 downto 0);
+type mult_file is array (14 downto 0) of signed (31 downto 0);
+type st1_file is array (6 downto 0) of signed (31 downto 0);
+type st2_file is array (3 downto 0) of signed (31 downto 0);
 signal x_reg: reg_file := (others => (others => '0'));
 signal x_next: reg_file := (others => (others => '0'));
 signal sum_reg: sum_file := (others => (others => '0'));
@@ -38,7 +38,7 @@ signal mult_reg: mult_file := (others => (others => '0'));
 signal mult_next: mult_file := (others => (others => '0'));
 signal st1_reg, st1_next: st1_file := (others => (others => '0'));
 signal st2_reg, st2_next: st2_file := (others => (others => '0'));
-signal md_reg, md_next, st3_reg, st3_next, st4_reg, st4_next, st5_reg, st5_next: signed (63 downto 0) := (others => '0');
+signal md_reg, md_next, st3_reg, st3_next, st4_reg, st4_next, st5_reg, st5_next: signed (31 downto 0) := (others => '0');
 begin
 	--Registros
 	process (clk, reset)
@@ -148,5 +148,5 @@ begin
 	-- Etapa 6 - Suma final
 	st5_next <= st3_reg + st4_reg;
 	-- Salida
-	y <= std_logic_vector(resize(st5_reg, 32));
+	y <= std_logic_vector(resize(st5_reg, 16));
 end architecture;
